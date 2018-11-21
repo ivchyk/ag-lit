@@ -1,11 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { SharedModule } from './shared/shared.module';
+import { MatInputModule, MatButtonModule } from '@angular/material';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
-import { FooBarService  } from './services/foo-bar.service'
-import { MockDataService  } from './services/mock-data.service'
+import { FooBarService  } from './services/foo-bar.service';
+import { MockDataService  } from './services/mock-data.service';
 
-import { AgGridModule } from 'ag-grid-angular';
 
 @NgModule({
   declarations: [
@@ -13,7 +16,12 @@ import { AgGridModule } from 'ag-grid-angular';
   ],
   imports: [
     BrowserModule,
-    AgGridModule.withComponents([])
+    SharedModule,
+    BrowserAnimationsModule,
+    MatInputModule,
+    MatButtonModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [FooBarService, MockDataService],
   bootstrap: [AppComponent]

@@ -4,12 +4,20 @@
     Litmus test app!
   </h1>
 </div>
-<ag-grid-angular
-  style="width: 500px; height: 500px;"
-  class="ag-theme-balham"
-  [rowData]="rowData"
-  [columnDefs]="columnDefs"
->
-</ag-grid-angular>
+<form #formGrid="ngForm" (ngSubmit)="onSubmit(formGrid)">
+  <div style="margin-left: 2em;display: flex; justify-content: space-between; width: 30%">
+    <mat-form-field class="example-full-width">
+      <input matInput placeholder="rows" type="number" min="500" #rowsControl="ngModel" [ngModel]="rows | async" value=""  name="rows">
+    </mat-form-field>
+    <mat-form-field class="example-full-width">
+      <input matInput placeholder="columns" type="number" min="10" #colsControl="ngModel" [ngModel]="columns | async"  name="cols">
+    </mat-form-field>
+    <div class="form-submit">
+      <button type="submit" mat-raised-button color="primary">Go</button>
+    </div>
+  </div>
+</form>
+
+<app-table-grid *ngIf="(agTableData | async) !== undefined" [clTableData]="agTableData | async"></app-table-grid>
 
 
