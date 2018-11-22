@@ -59,6 +59,7 @@ export type TableOptions = {
   groupSuppressAutoColumn?: boolean,
   rowDoubleClicked?: any,
   cellDoubleClicked?: any,
+  getRowNodeId?: (data: any) => any,
 };
 export type TableRowClassRules = { [cssClassName: string]: (params: any) => boolean };
 

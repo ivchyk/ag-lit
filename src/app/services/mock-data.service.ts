@@ -16,7 +16,7 @@ export class MockDataService {
   private readonly marketCap: string[] = ['Unknown', 'Micro', 'Small', 'Mid', 'Large', 'Mega'];
   private readonly direction: string[] = ['Long', 'Short'];
   private readonly giscSector: string[] = ['Consumer Discretionary', 'Consumer Staples', 'Currency Hedge', 'Financials', 'Health Care',
-                                           'Industrials', 'Information Technology', 'Matket Hedge', 'Materials', 'Real Estate', 'Telecomunication Services'];
+                                           'Industrials', 'Information Technology', 'Market Hedge', 'Materials', 'Real Estate', 'Telecomunication Services'];
   private cellsSnapshot: any[] = [];
 
   constructor() {}
@@ -27,9 +27,10 @@ export class MockDataService {
       {field: 'market_cap', headerName: 'Market Cap', width: 75, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
       {field: 'gisc_sector', headerName: 'Gisc Sector', width: 90, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
       {field: 'portfolio', headerName: 'Portfolio', width: 300, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
-      {field: 'pnl', headerName: 'P&L', width: 75},
-      {field: 'weight', headerName: 'Weight', width: 75},
-      {field: 'ctr', headerName: 'CTR', width: 75},
+      {field: 'pnl', headerName: 'P&L', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
+      {field: 'weight', headerName: 'Weight', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
+      {field: 'ctr', headerName: 'CTR', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
+      {field: 'litmusId', headerName: '', hide: true}
     ];
     this.cells = [];
     for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
@@ -52,19 +53,20 @@ export class MockDataService {
             'weight': Math.floor(Math.random() * 50),
           };
         }
-        this.cells[rowIndex] = {
-          'direction': MockDataService.takeDirection(this.direction),
-          'market_cap': MockDataService.takeDirection(this.marketCap),
-          'gisc_sector': MockDataService.takeDirection(this.giscSector),
-          'portfolio': MockDataService.takeDirection(this.portfolio),
-          'pnl': Math.floor(Math.random() * 100),
-          'weight': Math.floor(Math.random() * 50),
-        };
+        this.cells[rowIndex].litmusId = rowIndex + 1;
+        // this.cells[rowIndex] = {
+        //   'direction': MockDataService.takeDirection(this.direction),
+        //   'market_cap': MockDataService.takeDirection(this.marketCap),
+        //   'gisc_sector': MockDataService.takeDirection(this.giscSector),
+        //   'portfolio': MockDataService.takeDirection(this.portfolio),
+        //   'pnl': Math.floor(Math.random() * 100),
+        //   'weight': Math.floor(Math.random() * 50),
+        // };
         this.cells[rowIndex].ctr = this.cells[rowIndex].pnl * this.cells[rowIndex].weight;
       }
       for (let colIndex = 6; colIndex < columns; colIndex++) {
         if (rowIndex === 0) {
-          const col = {field: 'Col' + colIndex, headerName: 'Column ' + (1 + colIndex), width: 50};
+          const col = {field: 'Col' + colIndex, headerName: 'Column ' + (1 + colIndex), width: 80, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""};
           this.columns.push(col);
         }
         if (this.cells[rowIndex]['Col' + colIndex] === undefined) {
@@ -76,13 +78,13 @@ export class MockDataService {
   }
 
   public getData(rows: number, columns: number): Observable<{cells: any, columns: any}> {
-    const source = interval(7000);
+    const source = interval(15000);
     return source.pipe(
       map(_ => {
           this.initData(rows, columns);
-        return { columns: this.columns, cells: this.cells, columnGroup: this.columnGroup};
+        return { columns: this.columns, cells: this.cells, columnGroup: this.columnGroup };
       }),
-        take(3)
+       // take(3)
     );
   }
 

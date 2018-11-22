@@ -1,11 +1,6 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Litmus test app!
-  </h1>
-</div>
+<app-table-grid *ngIf="(agTableData | async) !== undefined" [clTableData]="agTableData | async"></app-table-grid>
 <form #formGrid="ngForm" (ngSubmit)="onSubmit(formGrid)">
-  <div style="margin-left: 2em;display: flex; justify-content: space-between; width: 30%">
+  <div style="margin: 2em;display: flex; justify-content: space-between; width: 30%">
     <mat-form-field class="example-full-width">
       <input matInput placeholder="rows" type="number" min="500" #rowsControl="ngModel" [ngModel]="rows | async" value=""  name="rows">
     </mat-form-field>
@@ -17,7 +12,5 @@
     </div>
   </div>
 </form>
-
-<app-table-grid *ngIf="(agTableData | async) !== undefined" [clTableData]="agTableData | async"></app-table-grid>
 
 

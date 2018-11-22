@@ -35,7 +35,7 @@ import { first } from 'rxjs/operators';
                 style="width: 100%; height: 94vh"
                 #agGrid
                 [rowData]="rowData"
-                class="ag-theme-balham"
+                class="ag-theme-balham-dark"
                 [columnDefs]="columnDefs"
                 [groupUseEntireRow]="groupUseEntireRow"
                 [enableSorting]="true"
@@ -56,6 +56,7 @@ import { first } from 'rxjs/operators';
                 [groupSuppressAutoColumn]="groupSuppressAutoColumn"
                 [rememberGroupStateWhenNewData]="true"
                 [rowGroupPanelShow]="'always'"
+                [getRowNodeId]="getRowNodeId"
             ></ag-grid-angular>
         </div>
     `
@@ -89,6 +90,7 @@ export class TableGridComponent implements OnInit, OnDestroy, GridInterface {
   public enableFilter: boolean = false;
   public suppressFloatingFilter: boolean = false;
   public groupSuppressAutoColumn: boolean = false;
+  public getRowNodeId: any;
   public gridApi: GridApi;
   public gridColumnApi: ColumnApi;
   public columnState: ColumnState[];
@@ -124,76 +126,20 @@ export class TableGridComponent implements OnInit, OnDestroy, GridInterface {
 
   public onRowDataChanged(params: any): void {
     if (this.gridApi) {
-      console.log(this.columnState);
       // this.gridApi.sizeColumnsToFit();
-      //this.gridApi.expandAll();
+      this.gridApi.expandAll();
       // this.rowsExpanded = true;
     }
   }
 
   public ngOnInit(): void {
-    console.log('init table component');
-    this.subscriptions["agData"] = this.agTableData
-      // .pipe(
-      //   first()
-      // )
+    this.subscriptions.agData = this.agTableData
       .subscribe(
         (tableData: TableGridModel): void => {
-          console.log(tableData);
-          this.columnDefs = tableData.columns;
-          this.autoGroupColumnDef = tableData.columnGroup;
-          if (tableData.agregation !== undefined) {
-            this.agregation = tableData.agregation;
-          }
-          if (tableData.options) {
-            this.groupUseEntireRow = tableData.options.groupUseEntireRow;
-            this.enableSorting = tableData.options.enableSorting;
-            this.enableColResize = tableData.options.enableColResize;
-            this.enableRangeSelection = tableData.options.enableRangeSelection;
-            this.showExpandButton = tableData.options.showExpandButton !== undefined ? tableData.options.showExpandButton : this.showExpandButton;
-            this.showFitToSizeButton = tableData.options.showFitToSizeButton !== undefined ? tableData.options.showFitToSizeButton : this.showFitToSizeButton;
-            if (tableData.options.wrapperHeight !== undefined) {
-              this.wrapperHeight = tableData.options.wrapperHeight;
-            }
-            if (tableData.options.headerHeight !== undefined) {
-              this.headerHeight = tableData.options.headerHeight;
-            }
-            if (tableData.options.groupHeaderHeight !== undefined) {
-              this.groupHeaderHeight = tableData.options.groupHeaderHeight;
-            }
-            if (tableData.options.enableFilter !== undefined) {
-              this.enableFilter = tableData.options.enableFilter;
-            }
-            if (tableData.options.groupMultiAutoColumn !== undefined) {
-              this.groupMultiAutoColumn = tableData.options.groupMultiAutoColumn;
-            }
-            if (tableData.options.groupSuppressAutoColumn !== undefined) {
-              this.groupSuppressAutoColumn = tableData.options.groupSuppressAutoColumn;
-            }
-          }
-
-          for (const columnItem of  this.columnDefs) {
-            if (columnItem['rowGroup'] === undefined) {
-              this.recursiveLoop(columnItem);
-            }
-          }
-          this.agregationSnapshot = {};
-          for (const reducedColumnItem of  this.reducedColumns ) {
-            this.agregationSnapshot[reducedColumnItem] = '';
-          }
-          this.rowData = tableData.rowData;
-          if (tableData.rowClassRules) {
-            this.rowClassRules = tableData.rowClassRules;
-          }
-
-          if  (this.agregation) {
-            this.groupRowAggNodes = (nodes: RowNode[]): TableAgregationFactor => this.agregation(nodes, this.agregationSnapshot, this.autoGroupColumnDef);
-          }
-          if (tableData.pinnedBottomRowData) {
-            this.pinnedBottomRowData = tableData.pinnedBottomRowData;
-          }
-          if (tableData.pinnedTopRowData) {
-            this.pinnedTopRowData = tableData.pinnedTopRowData;
+          if (this.columnDefs === undefined || this.columnDefs.length !== tableData.columns.length) {
+            this.initData(tableData);
+          } else {
+            this.gridApi.updateRowData({update: tableData.rowData});
           }
         },
         (error: Error): void => {
@@ -281,5 +227,66 @@ export class TableGridComponent implements OnInit, OnDestroy, GridInterface {
     setTimeout(() => {
       this.gridApi.refreshHeader();
     }, 0);
+  }
+
+  private initData(tableData: TableGridModel): void {
+    this.columnDefs = tableData.columns;
+    this.autoGroupColumnDef = tableData.columnGroup;
+    if (tableData.agregation !== undefined) {
+      this.agregation = tableData.agregation;
+    }
+    if (tableData.options) {
+      this.groupUseEntireRow = tableData.options.groupUseEntireRow;
+      this.enableSorting = tableData.options.enableSorting;
+      this.enableColResize = tableData.options.enableColResize;
+      this.enableRangeSelection = tableData.options.enableRangeSelection;
+      this.showExpandButton = tableData.options.showExpandButton !== undefined ? tableData.options.showExpandButton : this.showExpandButton;
+      this.showFitToSizeButton = tableData.options.showFitToSizeButton !== undefined ? tableData.options.showFitToSizeButton : this.showFitToSizeButton;
+      if (tableData.options.wrapperHeight !== undefined) {
+        this.wrapperHeight = tableData.options.wrapperHeight;
+      }
+      if (tableData.options.headerHeight !== undefined) {
+        this.headerHeight = tableData.options.headerHeight;
+      }
+      if (tableData.options.groupHeaderHeight !== undefined) {
+        this.groupHeaderHeight = tableData.options.groupHeaderHeight;
+      }
+      if (tableData.options.enableFilter !== undefined) {
+        this.enableFilter = tableData.options.enableFilter;
+      }
+      if (tableData.options.groupMultiAutoColumn !== undefined) {
+        this.groupMultiAutoColumn = tableData.options.groupMultiAutoColumn;
+      }
+      if (tableData.options.groupSuppressAutoColumn !== undefined) {
+        this.groupSuppressAutoColumn = tableData.options.groupSuppressAutoColumn;
+      }
+      if (tableData.options.getRowNodeId !== undefined) {
+        this.getRowNodeId = tableData.options.getRowNodeId;
+      }
+    }
+
+    for (const columnItem of  this.columnDefs) {
+      if (columnItem['rowGroup'] === undefined) {
+        this.recursiveLoop(columnItem);
+      }
+    }
+    this.agregationSnapshot = {};
+    for (const reducedColumnItem of  this.reducedColumns ) {
+      this.agregationSnapshot[reducedColumnItem] = '';
+    }
+    this.rowData = tableData.rowData;
+    if (tableData.rowClassRules) {
+      this.rowClassRules = tableData.rowClassRules;
+    }
+
+    if  (this.agregation) {
+      this.groupRowAggNodes = (nodes: RowNode[]): TableAgregationFactor => this.agregation(nodes, this.agregationSnapshot, this.autoGroupColumnDef);
+    }
+    if (tableData.pinnedBottomRowData) {
+      this.pinnedBottomRowData = tableData.pinnedBottomRowData;
+    }
+    if (tableData.pinnedTopRowData) {
+      this.pinnedTopRowData = tableData.pinnedTopRowData;
+    }
   }
 }

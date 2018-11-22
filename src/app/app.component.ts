@@ -27,8 +27,6 @@ export class AppComponent implements OnInit, OnDestroy {
   public columnDefs: any[] = [];
   public autoGroupColumnDef: any = undefined;
   public subscription: Subscription[] = [];
-  public gridApi: GridApi;
-  public gridColumnApi: ColumnApi;
   public agTableData: BehaviorSubject<TableGridModel>;
   public rows: BehaviorSubject<number> = undefined;
   public columns: BehaviorSubject<number> = undefined;
@@ -53,15 +51,16 @@ export class AppComponent implements OnInit, OnDestroy {
        // tableData.columnGroup = data.columnGroup;
         tableData.rowData = data.cells;
         tableData.columns = data.columns;
-        // tableData.options = {
-        //    groupUseEntireRow: true,
-        //   enableSorting: true,
-        //   enableRangeSelection: true,
-        //   enableColResize: true,
-        //   showFitToSizeButton: true,
-        //   headerHeight: 42,
-        //   wrapperHeight: '94vh'
-        // };
+        tableData.options = {
+          getRowNodeId: (rowObject: any) => rowObject.litmusId,
+          groupUseEntireRow: false,
+          enableSorting: true,
+          enableRangeSelection: true,
+          enableColResize: true,
+          // showFitToSizeButton: true,
+          // headerHeight: 42,
+          // wrapperHeight: '94vh'
+        };
         this.agTableData.next(tableData);
       });
   }
