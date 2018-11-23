@@ -18,6 +18,29 @@ export class MockDataService {
   private readonly giscSector: string[] = ['Consumer Discretionary', 'Consumer Staples', 'Currency Hedge', 'Financials', 'Health Care',
                                            'Industrials', 'Information Technology', 'Market Hedge', 'Materials', 'Real Estate', 'Telecomunication Services'];
   private cellsSnapshot: any[] = [];
+  private columnValueRank: any = {
+    'pnl': {
+      20: 'cell-style2',
+      40: 'cell-style3',
+      60: 'cell-style4',
+      80: 'cell-style5',
+      100: 'cell-style6',
+    },
+    'weight': {
+      10: 'cell-style2',
+      20: 'cell-style3',
+      30: 'cell-style4',
+      40: 'cell-style5',
+      50: 'cell-style2',
+    },
+    'ctr': {
+      2000: 'cell-style2',
+      4000: 'cell-style3',
+      6000: 'cell-style4',
+      8000: 'cell-style5',
+      10000: 'cell-style6',
+    }
+  }
 
   constructor() {}
 
@@ -27,11 +50,12 @@ export class MockDataService {
       {field: 'market_cap', headerName: 'Market Cap', width: 75, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
       {field: 'gisc_sector', headerName: 'Gisc Sector', width: 90, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
       {field: 'portfolio', headerName: 'Portfolio', width: 300, rowGroup: true, enableRowGroup: true, columnGroupShow: false, hide: true},
-      {field: 'pnl', headerName: 'P&L', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
-      {field: 'weight', headerName: 'Weight', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
-      {field: 'ctr', headerName: 'CTR', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""},
+      {field: 'pnl', headerName: 'P&L', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass:  (params: any): string => this.takeClasses(params) },
+      {field: 'weight', headerName: 'Weight', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string => this.takeClasses(params)},
+      {field: 'ctr', headerName: 'CTR', width: 75, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string => this.takeClasses(params)},
       {field: 'litmusId', headerName: '', hide: true}
     ];
+
     this.cells = [];
     for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
       if (this.cells[rowIndex] === undefined) {
@@ -54,20 +78,22 @@ export class MockDataService {
           };
         }
         this.cells[rowIndex].litmusId = rowIndex + 1;
-        // this.cells[rowIndex] = {
-        //   'direction': MockDataService.takeDirection(this.direction),
-        //   'market_cap': MockDataService.takeDirection(this.marketCap),
-        //   'gisc_sector': MockDataService.takeDirection(this.giscSector),
-        //   'portfolio': MockDataService.takeDirection(this.portfolio),
-        //   'pnl': Math.floor(Math.random() * 100),
-        //   'weight': Math.floor(Math.random() * 50),
-        // };
         this.cells[rowIndex].ctr = this.cells[rowIndex].pnl * this.cells[rowIndex].weight;
       }
       for (let colIndex = 6; colIndex < columns; colIndex++) {
         if (rowIndex === 0) {
-          const col = {field: 'Col' + colIndex, headerName: 'Column ' + (1 + colIndex), width: 80, cellRenderer: 'agAnimateShowChangeCellRenderer', cellClass: (params: any): string =>  Number.isInteger(params.value) ? "digits-align" : ""};
+            const col = {field: 'Col' + colIndex, headerName: 'Column ' + (1 + colIndex), width: 80,
+            cellRenderer: 'agAnimateShowChangeCellRenderer',
+            cellClass: (params: any): string => this.takeClasses(params)
+          };
           this.columns.push(col);
+          this.columnValueRank['Col' + colIndex] = {
+            100: 'cell-style2',
+            200: 'cell-style3',
+            300: 'cell-style4',
+            400: 'cell-style5',
+            500: 'cell-style6',
+          };
         }
         if (this.cells[rowIndex]['Col' + colIndex] === undefined) {
           this.cells[rowIndex]['Col' + colIndex] = Math.floor(Math.random() * 500) + 1;
@@ -78,13 +104,13 @@ export class MockDataService {
   }
 
   public getData(rows: number, columns: number): Observable<{cells: any, columns: any}> {
-    const source = interval(15000);
+    const source = interval(10000);
     return source.pipe(
       map(_ => {
           this.initData(rows, columns);
-        return { columns: this.columns, cells: this.cells, columnGroup: this.columnGroup };
+        return { columns: this.columns, cells: this.cells, columnGroup: this.columnGroup, columnValueRank: this.columnValueRank };
       }),
-       // take(3)
+        take(1)
     );
   }
 
@@ -93,4 +119,33 @@ export class MockDataService {
     const randomPosition: number = Math.floor(Math.random() * valuesCount);
     return values[randomPosition];
   }
+
+  private classForDigitValue(cellValue: string | number | null): string   {
+    if (!cellValue) {
+      return  cellValue === 0 ? 'digits-align' : '';
+    }
+    const replacedComma: string = cellValue.toString()
+      .replace(/\./g, '')
+      .replace(',', '.');
+
+    return !isNaN(parseFloat(replacedComma)) ? 'digits-align' : '';
+  }
+
+
+  private takeClasses(params: any) {
+    let classes = this.classForDigitValue(params.value) + ' ';
+    const cell = params.colDef.field;
+    const cell_value = params.value;
+    if (this.columnValueRank[cell] !== undefined) {
+      let back_style: string = 'cell-style1';
+      for (const rank_value in  this.columnValueRank[cell]) {
+        if (cell_value >= rank_value ) {
+          back_style = this.columnValueRank[cell][rank_value];
+        }
+      }
+      classes += back_style;
+    }
+    return classes;
+  }
+
 }

@@ -13,3 +13,26 @@
 .digits-align {
   text-align: right;
 }
+
+.cell-style1 {
+  background-color: #ff5459;
+}
+
+.cell-style2 {
+  background-color: #cd8875;
+}
+
+.cell-style3 {
+  background-color: #cdbb56;
+}
+
+.cell-style4 {
+}
+
+.cell-style5 {
+  background-color: #7dc75a;
+}
+
+.cell-style6 {
+  background-color: #098922;
+}

@@ -30,9 +30,9 @@ import { first } from 'rxjs/operators';
 @Component({
   selector: 'app-table-grid',
   template: `
-        <div #tableWrapper style="height: 94vh">
+        <div #tableWrapper style="height: 92vh">
             <ag-grid-angular
-                style="width: 100%; height: 94vh"
+                style="width: 100%; height: 92vh"
                 #agGrid
                 [rowData]="rowData"
                 class="ag-theme-balham-dark"
@@ -57,6 +57,7 @@ import { first } from 'rxjs/operators';
                 [rememberGroupStateWhenNewData]="true"
                 [rowGroupPanelShow]="'always'"
                 [getRowNodeId]="getRowNodeId"
+                [sideBar]="sideBar"
             ></ag-grid-angular>
         </div>
     `
@@ -93,6 +94,18 @@ export class TableGridComponent implements OnInit, OnDestroy, GridInterface {
   public getRowNodeId: any;
   public gridApi: GridApi;
   public gridColumnApi: ColumnApi;
+  public readonly sideBar = {
+    toolPanels: [{
+      id: 'columns',
+      labelDefault: 'Columns',
+      labelKey: 'columns',
+      iconKey: 'columns',
+      toolPanel: 'agColumnsToolPanel',
+      toolPanelParams: {
+        suppressPivotMode: true
+      }
+    }]
+  }
   public columnState: ColumnState[];
   private agregationSnapshot: TableAgregationFactor;
   private reducedColumns: string[] = [];
@@ -106,7 +119,6 @@ export class TableGridComponent implements OnInit, OnDestroy, GridInterface {
   }
 
   public onGridReady(params: any): void {
-    console.log(`on grid ready`);
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
     this.gridApi.expandAll();
